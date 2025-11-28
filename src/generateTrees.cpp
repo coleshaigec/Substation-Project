@@ -5,6 +5,7 @@
 #include <stdexcept>
 #include <functional>
 #include <utility>
+#include <queue>
 
 using namespace std;
 
@@ -16,6 +17,11 @@ struct Edge {
   int destination;
   double distance;
   double cost;
+};
+
+struct SPT {
+  vector<int> parent;
+  vector<double> distance;
 };
 
 // Type alias for readability
@@ -96,7 +102,7 @@ Graph readGraphFromFile(const string& fileName, int& plantID){
  *
  * The caller is responsible for writing the resulting tree to a file.
  */
-void generateShortestPathTree(const Graph& G, int plant){
+SPT generateShortestPathTree(const Graph& G, int plant){
   int N = G.size();
   vector<int> parent(N, -1);
   vector<double> dist(N, numeric_limits<double>::infinity());
@@ -131,6 +137,29 @@ void generateShortestPathTree(const Graph& G, int plant){
     }
     visited[u] = true;
   }
+
+  SPT tree;
+  tree.parent = parent;
+  tree.distance = dist;
+  return tree;
+}
+
+
+
+void writeSPTtoFile(const SPT& tree, const string& fileName){
+  ofstream file(fileName);
+
+  if (!file) {
+    throw runtime_error("Could not open file for writing SPT: " + fileName);
+  }
+
+  int N = tree.parent.size();
+
+  for (int i = 0; i < N; i++){
+    file << i << " " << tree.parent[i] << " " << tree.distance[i] << "\n";
+  }
+
+  file.close();
 }
 
 
@@ -149,6 +178,17 @@ bool compareCosts(const Edge& e1, const Edge& e2){
 
 
 int main(int argc, char** argv){
+  try {
+    int plantID;
+    Graph G = readGraphFromFile(argv[1], plantID);
+
+    SPT tree = generateShortestPathTree(G, plantID);
+    writeSPTtoFile(tree, "shortestPathTree.txt");
+  }
+  catch (const exception& e){
+    cerr << "Error: " << e.what() << endl;
+    return 1;
+  }
 
 
   return 0;
