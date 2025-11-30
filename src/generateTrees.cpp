@@ -320,7 +320,6 @@ void writeMSTtoFile(const EdgeList& MST, const string& fileName){
 }
 
 
-
 int main(int argc, char** argv){
   try {
     int plantID;
